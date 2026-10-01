@@ -1,0 +1,53 @@
+server:
+  port: 8080
+
+spring:
+  profiles:
+    active: mysql
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 100MB
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.album.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    db-config:
+      id-type: auto
+
+app:
+  jwt:
+    # 生产环境必须通过环境变量 JWT_SECRET 覆盖（长度 ≥ 32 字节的随机密钥），下方默认值仅限本地开发
+    secret: ${JWT_SECRET:IMLlj/nj6xoEtKPpuUIuqi8TuvdkzR6Rsocy5fQjNwi4l30EzuxKDcqaki6uFMTg}
+    expiration: ${JWT_EXPIRATION:86400000}
+  storage:
+    type: local
+    local:
+      base-path: /opt/album-maker/uploads
+      url-prefix: /uploads/
+  export:
+    # 导出产物保留期（小时），定时任务每小时清理超期 zip 与残留任务目录（FR-64/RULE-23）
+    retention-hours: 48
+
+---
+spring:
+  config:
+    activate:
+      on-profile: mysql
+  datasource:
+    url: jdbc:mysql://localhost:3306/album_maker?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&createDatabaseIfNotExist=true
+    username: ${DB_USER:album_maker}
+    # 数据库密码不落地：本地开发与生产环境均通过环境变量 DB_PASSWORD 提供
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+app:
+  cors:
+    # 生产环境追加自己的前端域名（通过环境变量 APP_CORS_ALLOWED_ORIGINS 或修改此处）
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000}

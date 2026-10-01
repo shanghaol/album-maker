@@ -1,0 +1,57 @@
+# Maven
+backend/target/
+*.class
+*.jar
+*.war
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+*.log
+.env
+.env.local
+
+# Uploaded files
+backend/uploads/
+backend/static/uploads/
+# IDE/AI 工具目录
+.trae/
+.zcode/
+.github/
+taste-skill/
+
+# 本地临时与素材(不入库)
+backend/data/
+frontend/dist.zip
+231760.mp4
+introduct/
+li.txt
+li2.txt
+API_TEST_REPORT.md
+BUG_REPORT.md
+SECURITY_AUDIT_REPORT.md
+FEATURE_REFINEMENTS.md
+FRONTEND_OPTIMIZATION_SUGGESTIONS.md
+.zcodeignore
+
+# 内部工程文档（含服务器部署信息，不上传公开仓库）
+MODIFICATION_LOG.md
+PROGRESS.md
+PROJECT_LOG.md
+srs/
+
+# 测试运行产物
+api-tests/results/

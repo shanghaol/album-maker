@@ -1,0 +1,265 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>demo - 相册预览</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        .book-container {
+            display: flex;
+            gap: 4px;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 20px;
+        }
+        .page-wrapper {
+            background: #fff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+        .page-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .page-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+        }
+        .photo-zone {
+            position: absolute;
+            overflow: hidden;
+        }
+        .photo-zone img {
+            position: absolute;
+            transform-origin: center center;
+        }
+        .page-num {
+            color: #fff;
+            font-size: 18px;
+            background: rgba(0,0,0,0.5);
+            padding: 8px 20px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+        }
+        .controls {
+            display: flex;
+            gap: 20px;
+            margin-top: 12px;
+            z-index: 100;
+        }
+        .controls button {
+            padding: 12px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            background: #4a90d9;
+            color: #fff;
+            transition: background 0.3s;
+        }
+        .controls button:hover { background: #357abd; }
+        .controls button:disabled { background: #666; cursor: not-allowed; }
+        @media (max-width: 900px) {
+            .book-container { flex-direction: column; gap: 8px; }
+            .controls button { padding: 10px 20px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-num">
+        <span id="currentPage">1</span> / <span id="totalPages">0</span>
+    </div>
+    <div class="book-container" id="bookContainer">
+        <div class="page-wrapper" id="leftWrapper">
+            <div class="page-inner" id="leftPage"></div>
+        </div>
+        <div class="page-wrapper" id="rightWrapper">
+            <div class="page-inner" id="rightPage"></div>
+        </div>
+    </div>
+    <div class="controls">
+        <button onclick="prevPage()" id="prevBtn">上一页</button>
+        <button onclick="nextPage()" id="nextBtn">下一页</button>
+    </div>
+
+    <script>var templatePages = [{"id":27,"templateId":7,"pageNumber":1,"backgroundUrl":"/uploads/templates/7/d816a5ef-0b1a-47c6-8bf8-6db0df3edbec.jpg","width":1024,"height":739,"createdAt":null}];</script>
+    <script>var projectPages = [{"id":2,"projectId":6,"pageNumber":1,"pageData":"{\"textZones\": [], \"photoZones\": [{\"x\": 0, \"y\": 0, \"scaleX\": 1, \"scaleY\": 1, \"zoneId\": 9, \"imageUrl\": \"http://192.168.1.235:3000/uploads/photos/2/6/origin/9ec95360-eb99-4c55-aa50-64b9cba9dd22.jpg\", \"rotation\": 0, \"originalUrl\": \"http://192.168.1.235:3000/uploads/photos/2/6/origin/9ec95360-eb99-4c55-aa50-64b9cba9dd22.jpg\"}, {\"x\": -0.1599289837265921, \"y\": -0.10597339433598849, \"scaleX\": 1.2965423618963272, \"scaleY\": 1.2965423618963272, \"zoneId\": 10, \"imageUrl\": \"http://192.168.1.235:3000/uploads/photos/2/6/origin/83ea1979-166c-4905-b682-ffb1a02b97b7.jpg\", \"rotation\": 0, \"originalUrl\": \"http://192.168.1.235:3000/uploads/photos/2/6/origin/83ea1979-166c-4905-b682-ffb1a02b97b7.jpg\"}, {\"x\": 0, \"y\": 0, \"scaleX\": 1, \"scaleY\": 1, \"zoneId\": 8, \"imageUrl\": \"http://192.168.1.235:3000/uploads/photos/2/6/origin/83b37b52-5175-4b50-9672-8241bae8c350.jpg\", \"rotation\": 0, \"originalUrl\": \"http://192.168.1.235:3000/uploads/photos/2/6/origin/83b37b52-5175-4b50-9672-8241bae8c350.jpg\"}], \"userStickers\": []}","previewUrl":null,"createdAt":null,"updatedAt":null}];</script>
+    <script>var allZones = [{"id":8,"pageId":27,"zoneType":"PHOTO","x":0.06623156542446532,"y":0.11114081996434938,"width":0.3941664604702884,"height":0.7717798594847777,"rotation":0.0,"placeholderText":"","sortOrder":0,"createdAt":null},{"id":9,"pageId":27,"zoneType":"PHOTO","x":0.5196934011530749,"y":0.1089126559714795,"width":0.38143873786000876,"height":0.3634074941451991,"rotation":0.0,"placeholderText":"","sortOrder":1,"createdAt":null},{"id":10,"pageId":27,"zoneType":"PHOTO","x":0.5164773597649288,"y":0.583511586452763,"width":0.30825433285090065,"height":0.28875878220140516,"rotation":0.0,"placeholderText":"","sortOrder":2,"createdAt":null}];</script>
+    <script>
+        var zonesByPageId = {};
+        for (var i = 0; i < allZones.length; i++) {
+            var z = allZones[i];
+            if (!zonesByPageId[z.pageId]) {
+                zonesByPageId[z.pageId] = [];
+            }
+            zonesByPageId[z.pageId].push(z);
+        }
+
+        var currentSpread = 0;
+        var totalSpreads = Math.ceil(templatePages.length / 2);
+
+        document.getElementById('totalPages').textContent = totalSpreads;
+        document.getElementById('currentPage').textContent = '1';
+
+        function normalizeUrl(url) {
+            if (!url) return '';
+            var idx = url.indexOf('/uploads/');
+            if (idx >= 0) {
+                return url.substring(idx);
+            }
+            return url;
+        }
+
+        function getPageIndex(spreadOffset, side) {
+            return spreadOffset * 2 + side;
+        }
+
+        function renderPage(container, pageIndex) {
+            container.innerHTML = '';
+
+            if (pageIndex >= templatePages.length) {
+                container.style.width = '400px';
+                container.style.height = '600px';
+                container.style.background = '#fff';
+                return;
+            }
+
+            var tplPage = templatePages[pageIndex];
+            var projPage = projectPages[pageIndex];
+            var zones = zonesByPageId[tplPage.id] || [];
+            var pageW = tplPage.width || 2480;
+            var pageH = tplPage.height || 3508;
+
+            var ratio = pageW / pageH;
+            var maxW = window.innerWidth * 0.48;
+            var maxH = window.innerHeight * 0.85;
+            var displayW, displayH;
+            if (maxW / ratio <= maxH) {
+                displayW = maxW;
+                displayH = maxW / ratio;
+            } else {
+                displayH = maxH;
+                displayW = maxH * ratio;
+            }
+
+            container.style.width = displayW + 'px';
+            container.style.height = displayH + 'px';
+
+            if (tplPage.backgroundUrl) {
+                var bgImg = document.createElement('img');
+                bgImg.className = 'page-bg';
+                bgImg.src = normalizeUrl(tplPage.backgroundUrl);
+                bgImg.alt = '';
+                container.appendChild(bgImg);
+            }
+
+            if (projPage && projPage.pageData) {
+                try {
+                    var pageData = JSON.parse(projPage.pageData);
+                    if (pageData.photoZones && pageData.photoZones.length > 0) {
+                        pageData.photoZones.forEach(function(photo) {
+                            if (!photo.imageUrl) return;
+                            var zone = null;
+                            for (var i = 0; i < zones.length; i++) {
+                                if (zones[i].id === photo.zoneId) {
+                                    zone = zones[i];
+                                    break;
+                                }
+                            }
+                            if (!zone) return;
+
+                            var zx = zone.x * 100;
+                            var zy = zone.y * 100;
+                            var zw = zone.width * 100;
+                            var zh = zone.height * 100;
+
+                            var zoneDiv = document.createElement('div');
+                            zoneDiv.className = 'photo-zone';
+                            zoneDiv.style.left = zx + '%';
+                            zoneDiv.style.top = zy + '%';
+                            zoneDiv.style.width = zw + '%';
+                            zoneDiv.style.height = zh + '%';
+
+                            var img = document.createElement('img');
+                            img.src = normalizeUrl(photo.imageUrl);
+                            img.alt = '';
+
+                            var px = photo.x * 100;
+                            var py = photo.y * 100;
+                            var psx = photo.scaleX * 100;
+                            var psy = photo.scaleY * 100;
+                            var rot = photo.rotation || 0;
+
+                            img.style.left = px + '%';
+                            img.style.top = py + '%';
+                            img.style.width = psx + '%';
+                            img.style.height = psy + '%';
+                            img.style.transform = 'rotate(' + rot + 'deg)';
+
+                            zoneDiv.appendChild(img);
+                            container.appendChild(zoneDiv);
+                        });
+                    }
+                } catch (e) {}
+            }
+        }
+
+        function renderSpread() {
+            var leftIdx = getPageIndex(currentSpread, 0);
+            var rightIdx = getPageIndex(currentSpread, 1);
+
+            var leftPage = document.getElementById('leftPage');
+            var rightPage = document.getElementById('rightPage');
+
+            renderPage(leftPage, leftIdx);
+            renderPage(rightPage, rightIdx);
+
+            document.getElementById('currentPage').textContent = currentSpread + 1;
+            document.getElementById('prevBtn').disabled = currentSpread <= 0;
+            document.getElementById('nextBtn').disabled = currentSpread >= totalSpreads - 1;
+        }
+
+        function prevPage() {
+            if (currentSpread > 0) {
+                currentSpread--;
+                renderSpread();
+            }
+        }
+
+        function nextPage() {
+            if (currentSpread < totalSpreads - 1) {
+                currentSpread++;
+                renderSpread();
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevPage();
+            if (e.key === 'ArrowRight') nextPage();
+        });
+
+        window.addEventListener('resize', function() {
+            renderSpread();
+        });
+
+        renderSpread();
+    </script>
+</body>
+</html>

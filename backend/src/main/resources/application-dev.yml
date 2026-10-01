@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:h2:file:./data/album_maker;DB_CLOSE_DELAY=-1;MODE=MySQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: false
+        trace: false
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema-h2.sql

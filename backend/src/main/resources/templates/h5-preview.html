@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" th:content="${project.title} + ' - 相册制作平台'">
+    <meta property="og:description" content="我在相册制作平台创作了一份作品，点击查看">
+    <meta property="og:type" content="website">
+    <meta property="og:image" th:if="${ogImage != null}" th:content="${ogImage}">
+    <title th:text="${project.title} + ' - 相册预览'">相册预览</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #fafafa;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            min-height: 100dvh;
+            font-family: 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            overflow: hidden;
+        }
+
+        .preview-header {
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 16px;
+            flex-shrink: 0;
+            backdrop-filter: blur(32px);
+            -webkit-backdrop-filter: blur(32px);
+            background: rgba(255, 255, 255, 0.6);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.03);
+            position: sticky;
+            top: 0;
+            z-index: 30;
+        }
+        .preview-title {
+            color: #1a1a2e;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .preview-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .book-wrapper {
+            perspective: 2000px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .flipbook {
+            position: relative;
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+        }
+        .book-page {
+            background-color: #fff;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .book-page::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 20px;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .book-page-left {
+            border-radius: 6px 0 0 6px;
+            box-shadow: -4px 4px 24px rgba(0,0,0,0.08);
+            z-index: 1;
+        }
+        .book-page-left::after {
+            right: 0;
+            background: linear-gradient(to right, transparent, rgba(0,0,0,0.04));
+        }
+        .book-page-right {
+            border-radius: 0 6px 6px 0;
+            box-shadow: 4px 4px 24px rgba(0,0,0,0.08);
+            z-index: 1;
+        }
+        .book-page-right::after {
+            left: 0;
+            background: linear-gradient(to left, transparent, rgba(0,0,0,0.04));
+        }
+        .page-inner {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            background-size: 100% 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            container-type: inline-size;
+        }
+        .photo-zone {
+            position: absolute;
+            overflow: hidden;
+        }
+        .photo-zone img {
+            position: absolute;
+            transform-origin: center center;
+        }
+
+        .sticker-wrapper {
+            position: absolute;
+            pointer-events: none;
+        }
+        .sticker-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .text-wrapper {
+            position: absolute;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .text-wrapper span {
+            width: 100%;
+            word-break: break-word;
+            line-height: 1.3;
+        }
+
+        .flip-card {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            transform-style: preserve-3d;
+            z-index: 10;
+            pointer-events: none;
+            display: none;
+        }
+        .flip-card.animating {
+            display: block;
+        }
+        .flip-face {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            overflow: hidden;
+            background-color: #fff;
+        }
+        .flip-face::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 40px;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .flip-card.forward .flip-front::after {
+            right: 0;
+            background: linear-gradient(to right, transparent, rgba(0,0,0,0.08));
+        }
+        .flip-card.forward .flip-back::after {
+            left: 0;
+            background: linear-gradient(to left, transparent, rgba(0,0,0,0.08));
+        }
+        .flip-card.backward .flip-front::after {
+            left: 0;
+            background: linear-gradient(to left, transparent, rgba(0,0,0,0.08));
+        }
+        .flip-card.backward .flip-back::after {
+            right: 0;
+            background: linear-gradient(to right, transparent, rgba(0,0,0,0.08));
+        }
+        .flip-back {
+            transform: rotateY(180deg);
+        }
+        .flip-card.forward {
+            right: 0;
+            transform-origin: left center;
+            border-radius: 0 6px 6px 0;
+            box-shadow: 8px 0 24px rgba(0,0,0,0.1);
+        }
+        .flip-card.forward .flip-back {
+            border-radius: 6px 0 0 6px;
+        }
+        .flip-card.backward {
+            left: 0;
+            transform-origin: right center;
+            border-radius: 6px 0 0 6px;
+            box-shadow: -8px 0 24px rgba(0,0,0,0.1);
+        }
+        .flip-card.backward .flip-back {
+            border-radius: 0 6px 6px 0;
+        }
+
+        .preview-footer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px 20px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+        .page-indicator {
+            color: rgba(0, 0, 0, 0.45);
+            font-size: 14px;
+            font-weight: 500;
+            min-width: 60px;
+            text-align: center;
+        }
+        .controls {
+            display: flex;
+            gap: 12px;
+        }
+        .controls button {
+            padding: 10px 28px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 24px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.85);
+            color: #1a1a2e;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+        }
+        .controls button:hover {
+            background: #fff;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+            transform: translateY(-1px);
+        }
+        .controls button:active { transform: scale(0.97); }
+        .controls button:disabled {
+            background: rgba(245, 245, 247, 0.9);
+            color: rgba(0, 0, 0, 0.25);
+            border-color: rgba(0, 0, 0, 0.04);
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        @media (max-width: 900px) {
+            .controls button { padding: 8px 20px; font-size: 13px; }
+            .preview-header { height: 48px; }
+            .preview-title { font-size: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-header">
+        <span class="preview-title" th:text="${project.title} + ' - 相册预览'">相册预览</span>
+    </div>
+    <div class="preview-body">
+        <div class="book-wrapper">
+            <div class="flipbook" id="flipbook">
+                <div class="book-page book-page-left" id="pageLeft"></div>
+                <div class="book-page book-page-right" id="pageRight"></div>
+                <div class="flip-card" id="flipCard">
+                    <div class="flip-face flip-front" id="flipFront"></div>
+                    <div class="flip-face flip-back" id="flipBack"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="preview-footer">
+        <span class="page-indicator"><span id="currentPage">1</span> / <span id="totalPages">0</span></span>
+        <div class="controls">
+            <button onclick="prevPage()" id="prevBtn">上一页</button>
+            <button onclick="nextPage()" id="nextBtn">下一页</button>
+        </div>
+    </div>
+
+    <script th:utext="'var templatePages = ' + ${templatePagesJson} + ';'"></script>
+    <script th:utext="'var projectPages = ' + ${projectPagesJson} + ';'"></script>
+    <script th:utext="'var allZones = ' + ${allZonesJson} + ';'"></script>
+    <script>
+        var zonesByPageId = {};
+        for (var i = 0; i < allZones.length; i++) {
+            var z = allZones[i];
+            if (!zonesByPageId[z.pageId]) {
+                zonesByPageId[z.pageId] = [];
+            }
+            zonesByPageId[z.pageId].push(z);
+        }
+
+        // 项目页按 pageNumber 查找：项目页可能不连续（如只保存了第2页），按下标取会错位
+        function findProjectPage(pageNumber) {
+            for (var i = 0; i < projectPages.length; i++) {
+                if (projectPages[i].pageNumber === pageNumber) return projectPages[i];
+            }
+            return null;
+        }
+
+        // ============================================================
+        // 创意元素渲染（与前端 utils/decorEngine.js 同算法，勿单改一侧）
+        // ============================================================
+        var DECOR_DEFAULTS = { fillStyle: 'dots', distribution: 'random', chars: ['♥'], count: 20, size: 0.03, sizeVariance: 0.5, waveRows: 3, rotation: 0, spread: 5, colors: ['#ffffff'], shapeCutout: false };
+
+        function clampNum(v, min, max, d) { var n = Number(v); return isNaN(n) ? d : Math.min(max, Math.max(min, n)); }
+        function clamp01(v) { return Math.min(1, Math.max(0, v)); }
+
+        // 切画幅保持照片原始比例：以原矩形中心为锚重排（M2 修订）
+        // 页面归一化坐标（w→页宽、h→页高）：像素比例不变 ⇔ (w·pw)/(h·ph) = ratio；保留 entry 其余字段（imageUrl/copyMode/rotation）
+        function refitPhotoRect(entry, pw, ph) {
+            if (!entry || !entry.ratio || !pw || !ph) return entry;
+            var pageAspect = pw / ph;
+            var imgAspect = entry.ratio;
+            var w = entry.w, h = (w * pageAspect) / imgAspect;
+            if (h > 1) { h = 1; w = (h * imgAspect) / pageAspect; }
+            if (w > 1) { w = 1; h = (w * pageAspect) / imgAspect; if (h > 1) { h = 1; w = (h * imgAspect) / pageAspect; } }
+            var cx = entry.x + entry.w / 2, cy = entry.y + entry.h / 2;
+            return Object.assign({}, entry, { x: clamp01(cx - w / 2), y: clamp01(cy - h / 2), w: w, h: h });
+        }
+
+        function normalizeDecorParams(raw) {            var p = {};
+            for (var k in DECOR_DEFAULTS) p[k] = (raw && raw[k] !== undefined && raw[k] !== null) ? raw[k] : DECOR_DEFAULTS[k];
+            p.count = Math.round(clampNum(p.count, 1, 200, 20));
+            p.size = clampNum(p.size, 0.005, 0.5, 0.03);
+            p.waveRows = Math.round(clampNum(p.waveRows, 1, 12, 3));
+            p.spread = Math.round(clampNum(p.spread, 1, 10, 5));
+            return p;
+        }
+
+        function normalizeBlock(raw) {
+            var b = raw || {};
+            var out = {
+                style: b.style === 'stripe' ? 'stripe' : 'solid',
+                color: b.color || '#ff8fab', color2: b.color2 || '#ffffff',
+                stripeDir: b.stripeDir === 'v' ? 'v' : 'h',
+                stripeDensity: Math.round(clampNum(b.stripeDensity, 2, 40, 8)),
+                x: clampNum(b.x, 0, 9, 0.1), y: clampNum(b.y, 0, 9, 0.35),
+                w: clampNum(b.w, 0, 9, 0.5), h: clampNum(b.h, 0, 9, 0.3),
+                shapeCutout: !!b.shapeCutout
+            };
+            if (out.w * out.h > 9) { var k2 = 3 / Math.sqrt(out.w * out.h); out.w *= k2; out.h *= k2; }
+            return out;
+        }
+
+        function seededRandom(seed) {
+            var s = seed >>> 0;
+            return function () { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+        }
+        function hashParams(p) {
+            var str = JSON.stringify([p.fillStyle, p.distribution, p.chars, p.count, p.size, p.sizeVariance, p.waveRows, p.rotation, p.spread, p.colors]);
+            var h = 0;
+            for (var i = 0; i < str.length; i++) { h = ((h << 5) - h + str.charCodeAt(i)) | 0; }
+            return h;
+        }
+
+        function generateDistribution(rawParams) {
+            var p = normalizeDecorParams(rawParams);
+            var rand = seededRandom(hashParams(p));
+            var items = [];
+            var cols, i, row, col, angle, dist;
+            switch (p.distribution) {
+                case 'grid':
+                    cols = Math.ceil(p.count / p.waveRows);
+                    for (i = 0; i < p.count; i++) {
+                        row = Math.floor(i / cols); col = i % cols;
+                        items.push({ x: (col + 0.5) / cols, y: (row + 0.5) / p.waveRows, size: clamp01(p.size * (1 + (rand() - 0.5) * p.sizeVariance)), rotation: p.rotation, color: p.colors[i % p.colors.length], char: p.chars[i % p.chars.length] });
+                    }
+                    break;
+                case 'wave':
+                    cols = Math.ceil(p.count / p.waveRows);
+                    for (i = 0; i < p.count; i++) {
+                        row = Math.floor(i / cols); col = i % cols;
+                        items.push({ x: (col + 0.5) / cols, y: clamp01((row + 0.5) / p.waveRows + Math.sin((col / cols) * Math.PI * 2) * 0.04), size: clamp01(p.size * (1 + (rand() - 0.5) * p.sizeVariance)), rotation: p.rotation, color: p.colors[i % p.colors.length], char: p.chars[i % p.chars.length] });
+                    }
+                    break;
+                case 'rain':
+                    for (i = 0; i < p.count; i++) {
+                        items.push({ x: clamp01(rand()), y: clamp01(rand()), size: clamp01(p.size * (1 + (rand() - 0.5) * p.sizeVariance)), rotation: p.rotation, color: p.colors[i % p.colors.length], char: p.chars[i % p.chars.length] });
+                    }
+                    break;
+                case 'beam':
+                    for (i = 0; i < p.count; i++) {
+                        angle = (i / p.count) * Math.PI * 2 + (rand() - 0.5) * (p.spread / 10);
+                        dist = 0.18 + rand() * 0.32 * (p.spread / 5);
+                        items.push({ x: clamp01(0.5 + Math.cos(angle) * dist), y: clamp01(0.5 + Math.sin(angle) * dist * 1.2), size: clamp01(p.size * (1 + (rand() - 0.5) * p.sizeVariance)), rotation: p.rotation + angle * 180 / Math.PI, color: p.colors[i % p.colors.length], char: p.chars[i % p.chars.length] });
+                    }
+                    break;
+                default:
+                    for (i = 0; i < p.count; i++) {
+                        items.push({ x: clamp01(rand()), y: clamp01(rand()), size: clamp01(p.size * (1 + (rand() - 0.5) * p.sizeVariance)), rotation: p.rotation + (rand() - 0.5) * 40 * (p.spread / 5), color: p.colors[i % p.colors.length], char: p.chars[i % p.chars.length] });
+                    }
+            }
+            return items;
+        }
+
+        var currentView = 0;
+        var totalViews = templatePages.length;
+        var pageW = 0;
+        var pageH = 0;
+        var displayW = 0;
+        var displayH = 0;
+        var isFlipping = false;
+
+        document.getElementById('totalPages').textContent = templatePages.length * 2;
+
+        function normalizeUrl(url) {
+            if (!url) return '';
+            var idx = url.indexOf('/uploads/');
+            if (idx >= 0) return url.substring(idx);
+            return url;
+        }
+
+        // ============================================================
+        // 异形区域呈现（v1.6 选择工具箱）：单形状 clip-path / 复合 SVG 蒙版
+        // 与前端 utils/zoneGeometry.js 同源（H5 模板无法引 ES 模块，故内联复制）
+        // ============================================================
+        function h5RectCorners(op) {
+            var cx = op.x + op.w / 2, cy = op.y + op.h / 2;
+            var hw = op.w / 2, hh = op.h / 2;
+            var rad = (op.angle || 0) * Math.PI / 180;
+            var cos = Math.cos(rad), sin = Math.sin(rad);
+            // 注意：Thymeleaf 会把文本中相邻双中括号当内联表达式解析，这里避免数组嵌套字面量
+            var dxs = [-hw, hw, hw, -hw];
+            var dys = [-hh, -hh, hh, hh];
+            var out = [];
+            for (var i = 0; i < 4; i++) {
+                out.push([cx + dxs[i] * cos - dys[i] * sin, cy + dxs[i] * sin + dys[i] * cos]);
+            }
+            return out;
+        }
+
+        function h5EllipsePoints(op, segments) {
+            segments = segments || 24;
+            var cx = op.x + op.w / 2, cy = op.y + op.h / 2;
+            var rx = op.w / 2, ry = op.h / 2;
+            var rad = (op.angle || 0) * Math.PI / 180;
+            var pts = [];
+            for (var i = 0; i < segments; i++) {
+                var t = (i / segments) * Math.PI * 2;
+                var dx = rx * Math.cos(t), dy = ry * Math.sin(t);
+                pts.push([cx + dx * Math.cos(rad) - dy * Math.sin(rad), cy + dx * Math.sin(rad) + dy * Math.cos(rad)]);
+            }
+            return pts;
+        }
+
+        function h5ZoneOps(zone) {
+            var shape = (zone.shape || 'RECT').toUpperCase();
+            if (shape === 'POLYGON' || shape === 'COMPOUND') {
+                try {
+                    var ops = JSON.parse(zone.shapesJson || '[]');
+                    if (Array.isArray(ops) && ops.length) return ops;
+                } catch (e) { /* 脏数据回退 bbox */ }
+            }
+            return [{ op: 'add', shape: shape === 'ELLIPSE' ? 'ellipse' : 'rect',
+                x: zone.x, y: zone.y, w: zone.width, h: zone.height, angle: zone.rotation || 0 }];
+        }
+
+        function h5OpsBBox(ops) {
+            var minX = 1, minY = 1, maxX = 0, maxY = 0;
+            ops.forEach(function (op) {
+                if (op.op !== 'add') return;
+                var pts = op.shape === 'polygon' ? op.points :
+                    (op.shape === 'ellipse' ? h5EllipsePoints(op) : h5RectCorners(op));
+                pts.forEach(function (p) {
+                    minX = Math.min(minX, p[0]); minY = Math.min(minY, p[1]);
+                    maxX = Math.max(maxX, p[0]); maxY = Math.max(maxY, p[1]);
+                });
+            });
+            return { x: minX, y: minY, w: Math.max(0.0001, maxX - minX), h: Math.max(0.0001, maxY - minY) };
+        }
+
+        function h5PointsToPolygonStr(points, bbox) {
+            return 'polygon(' + points.map(function (p) {
+                return (((p[0] - bbox.x) / bbox.w) * 100).toFixed(3) + '% ' +
+                       (((p[1] - bbox.y) / bbox.h) * 100).toFixed(3) + '%';
+            }).join(', ') + ')';
+        }
+
+        /** 区域裁剪：ellipse/polygon 用 clip-path，compound 用 SVG 亮度蒙版 data-URI，RECT 不处理 */
+        function applyZoneClip(el, zone) {
+            var shape = (zone.shape || 'RECT').toUpperCase();
+            if (shape === 'ELLIPSE') {
+                var v = 'ellipse(50% 50% at 50% 50%)';
+                el.style.clipPath = v;
+                el.style.webkitClipPath = v;
+                return;
+            }
+            if (shape !== 'POLYGON' && shape !== 'COMPOUND') return;
+            var ops = h5ZoneOps(zone);
+            var bbox = h5OpsBBox(ops);
+            if (shape === 'POLYGON' && ops[0] && ops[0].shape === 'polygon') {
+                var v = h5PointsToPolygonStr(ops[0].points, bbox);
+                el.style.clipPath = v;
+                el.style.webkitClipPath = v;
+                return;
+            }
+            if (shape !== 'COMPOUND') return;
+            // 复合：SVG 内部用 luminance mask 完成布尔（add 白 / subtract 黑后绘覆盖），
+            // 输出白形于透明底 → 外层 CSS mask 走 alpha，无需 mask-mode，兼容性最好
+            var W = 1000;
+            var H = Math.max(1, Math.round(W * bbox.h / bbox.w));
+            function toLocal(p) {
+                return (((p[0] - bbox.x) / bbox.w) * W).toFixed(2) + ',' + (((p[1] - bbox.y) / bbox.h) * H).toFixed(2);
+            }
+            function opEl(op, fill) {
+                var pts = op.shape === 'polygon' ? op.points :
+                    (op.shape === 'ellipse' ? h5EllipsePoints(op) : h5RectCorners(op));
+                return '<polygon fill="' + fill + '" points="' + pts.map(toLocal).join(' ') + '"/>';
+            }
+            var inner = ops.map(function (o) { return opEl(o, o.op === 'add' ? '#fff' : '#000'); }).join('');
+            var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">'
+                + '<defs><mask id="m" maskUnits="userSpaceOnUse" x="0" y="0" width="' + W + '" height="' + H + '">'
+                + '<rect width="' + W + '" height="' + H + '" fill="#000"/>' + inner + '</mask></defs>'
+                + '<rect width="' + W + '" height="' + H + '" fill="#fff" mask="url(#m)"/></svg>';
+            var uri = 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")';
+            el.style.webkitMaskImage = uri;
+            el.style.maskImage = uri;
+            el.style.webkitMaskSize = '100% 100%';
+            el.style.maskSize = '100% 100%';
+            el.style.webkitMaskRepeat = 'no-repeat';
+            el.style.maskRepeat = 'no-repeat';
+        }
+
+
+        var isSinglePage = templatePages.length === 1;
+
+        // 画幅覆盖（M1/M2）：首页 pageData.canvas 优先于模板页尺寸
+        function firstPageCanvasOverride() {
+            var tpl = templatePages[0];
+            if (!tpl) return null;
+            var proj = findProjectPage(tpl.pageNumber);
+            if (proj && proj.pageData) {
+                try {
+                    var pd = JSON.parse(proj.pageData);
+                    if (pd && pd.canvas && pd.canvas.w && pd.canvas.h) return pd.canvas;
+                } catch (e) {}
+            }
+            return null;
+        }
+
+        function calcSize() {
+            var tpl = templatePages[0] || { width: 1024, height: 768 };
+            pageW = tpl.width || 1024;
+            pageH = tpl.height || 768;
+            var oc = firstPageCanvasOverride();
+            if (oc) { pageW = oc.w; pageH = oc.h; }
+            // 单页作品（创意拼贴）整页显示；相册模板页按左右两物理页展开
+            var physicalW = isSinglePage ? pageW : pageW / 2;
+            var ratio = physicalW / pageH;
+            var maxW = window.innerWidth * (isSinglePage ? 0.5 : 0.32);
+            var maxH = (window.innerHeight - 56 - 70) * 0.90;
+            if (maxW / ratio <= maxH) {
+                displayW = maxW;
+                displayH = maxW / ratio;
+            } else {
+                displayH = maxH;
+                displayW = maxH * ratio;
+            }
+        }
+
+        function updatePageNum() {
+            if (isSinglePage) {
+                document.getElementById('currentPage').textContent = '1';
+                document.getElementById('totalPages').textContent = '1';
+            } else {
+                var leftPhys = currentView * 2 + 1;
+                var rightPhys = leftPhys + 1;
+                document.getElementById('currentPage').textContent = leftPhys + '-' + rightPhys;
+                var totalPhys = templatePages.length * 2;
+                document.getElementById('totalPages').textContent = totalPhys;
+            }
+            document.getElementById('prevBtn').disabled = currentView <= 0;
+            document.getElementById('nextBtn').disabled = currentView >= totalViews - 1;
+        }
+
+        // 翻页动画兜底：transitionend 不触发（如标签页切后台）时强制完成，防止 isFlipping 卡死
+        var flipFallbackTimer = null;
+        var flipPendingDelta = 0;
+
+        function clearFlipFallback() {
+            if (flipFallbackTimer) {
+                clearTimeout(flipFallbackTimer);
+                flipFallbackTimer = null;
+            }
+        }
+
+        function completeFlip() {
+            if (!isFlipping) return;
+            isFlipping = false;
+            var card = document.getElementById('flipCard');
+            card.removeEventListener('transitionend', onFlipTransitionEnd);
+            clearFlipFallback();
+            card.className = 'flip-card';
+            card.style.transform = '';
+            currentView += flipPendingDelta;
+            updateStaticPages();
+            updatePageNum();
+        }
+
+        function onFlipTransitionEnd(e) {
+            if (!e || e.propertyName !== 'transform') return;
+            completeFlip();
+        }
+
+        function createPageContent(spreadIndex, isRightHalf) {
+            var tplPage = templatePages[spreadIndex];
+            var projPage = tplPage ? findProjectPage(tplPage.pageNumber) : null;
+            var zones = tplPage ? (zonesByPageId[tplPage.id] || []) : [];
+            // 画幅覆盖（M1/M2）：pageData.canvas 优先
+            var pgW = tplPage ? (tplPage.width || 1024) : 1024;
+            if (projPage && projPage.pageData) {
+                try {
+                    var pdz = JSON.parse(projPage.pageData);
+                    if (pdz && pdz.canvas && pdz.canvas.w) pgW = pdz.canvas.w;
+                } catch (e) {}
+            }
+
+            var innerDiv = document.createElement('div');
+            innerDiv.className = 'page-inner';
+            innerDiv.style.width = (isSinglePage ? displayW : displayW * 2) + 'px';
+            innerDiv.style.left = (!isSinglePage && isRightHalf) ? ('-' + displayW + 'px') : '0';
+
+            if (tplPage.backgroundUrl) {
+                innerDiv.style.backgroundImage = 'url(' + normalizeUrl(tplPage.backgroundUrl) + ')';
+            }
+
+            if (projPage && projPage.pageData) {
+                try {
+                    var pageData = JSON.parse(projPage.pageData);
+
+                    // 主色块（背景之上、内容之下）
+                    if (pageData.block) {
+                        var b = normalizeBlock(pageData.block);
+                        var blockDiv = document.createElement('div');
+                        blockDiv.style.cssText = 'position:absolute;pointer-events:none;left:' + (b.x * 100) + '%;top:' + (b.y * 100) + '%;width:' + (b.w * 100) + '%;height:' + (b.h * 100) + '%;';
+                        if (b.style === 'stripe') {
+                            var cell = (isSinglePage ? displayW : displayW * 2) / Math.max(2, b.stripeDensity);
+                            var dir = b.stripeDir === 'h' ? '180deg' : '90deg';
+                            blockDiv.style.background = 'repeating-linear-gradient(' + dir + ', ' + b.color + ' 0 ' + Math.round(cell) + 'px, ' + b.color2 + ' ' + Math.round(cell) + 'px ' + Math.round(cell * 2) + 'px)';
+                        } else {
+                            blockDiv.style.background = b.color;
+                        }
+                        innerDiv.appendChild(blockDiv);
+                    }
+
+                    // 装饰（同引擎确定性分布 + 手动放置）
+                    if (pageData.decorations && pageData.decorations.params) {
+                        var p = normalizeDecorParams(pageData.decorations.params);
+                        var all = generateDistribution(p).concat(pageData.decorations.placed || []);
+                        for (var di = 0; di < all.length; di++) {
+                            var it = all[di];
+                            if (!it || typeof it.x !== 'number') continue;
+                            var dSpan = document.createElement('span');
+                            dSpan.style.cssText = 'position:absolute;pointer-events:none;line-height:1;transform-origin:center center;color:' + (it.color || '#ffffff') + ';left:' + (it.x * 100) + '%;top:' + (it.y * 100) + '%;font-size:' + ((it.size || p.size) * 100) + 'cqi;transform:rotate(' + (it.rotation || 0) + 'deg);';
+                            dSpan.textContent = it.char || '♥';
+                            innerDiv.appendChild(dSpan);
+                        }
+                    }
+
+                    // PSD 分层模板图层（FR-59/NFR-11，D18）：档案初值 + 用户态覆盖，zIndex 与照片统一 z 序
+                    var tplLayersArr = [];
+                    try {
+                        tplLayersArr = tplPage && tplPage.layersJson ? (JSON.parse(tplPage.layersJson) || []) : [];
+                    } catch (e) { tplLayersArr = []; }
+                    var layerUserState = {};
+                    if (pageData.layers && pageData.layers.length) {
+                        for (var li = 0; li < pageData.layers.length; li++) {
+                            layerUserState[pageData.layers[li].id] = pageData.layers[li];
+                        }
+                    }
+                    for (var li = 0; li < tplLayersArr.length; li++) {
+                        var layer = tplLayersArr[li];
+                        if (!layer || !layer.url) continue;
+                        var st = layerUserState[layer.id] || {};
+                        if (st.visible === false || layer.visible === false) continue;
+                        var lx = st.x != null ? st.x : layer.x;
+                        var ly = st.y != null ? st.y : layer.y;
+                        var lw = st.width != null ? st.width : layer.width;
+                        var lh = st.height != null ? st.height : layer.height;
+                        var lImg = document.createElement('img');
+                        lImg.src = normalizeUrl(layer.url);
+                        lImg.alt = '';
+                        lImg.style.position = 'absolute';
+                        lImg.style.left = (lx * 100) + '%';
+                        lImg.style.top = (ly * 100) + '%';
+                        lImg.style.width = (lw * 100) + '%';
+                        lImg.style.height = (lh * 100) + '%';
+                        lImg.style.opacity = String(st.opacity != null ? st.opacity : (layer.opacity == null ? 1 : layer.opacity));
+                        lImg.style.pointerEvents = 'none';
+                        var lz = st.z != null ? st.z : layer.zIndex;
+                        if (lz != null) lImg.style.zIndex = String(lz);
+                        innerDiv.appendChild(lImg);
+                    }
+
+                    // 照片渲染（镂空文字背景对齐数据源）
+                    var photoUrl = null;
+                    if (pageData.photoZones && pageData.photoZones.length > 0) {
+                        // 先渲染自由照片（zoneId=null，创意拼贴；copyMode 平铺；refit 保持照片原始比例）
+                        pageData.photoZones.forEach(function(photoRaw) {
+                            if (!photoRaw.imageUrl || photoRaw.zoneId) return;
+                            if (!photoUrl) photoUrl = normalizeUrl(photoRaw.imageUrl);
+                            var photo = refitPhotoRect(photoRaw, pageW, pageH);
+                            var tiles = [{dx:0,dy:0}];
+                            if (photo.copyMode === 'tb') tiles.push({dx:0,dy:1});
+                            if (photo.copyMode === 'lr') tiles.push({dx:1,dy:0});
+                            tiles.forEach(function(t) {
+                                var wrapper = document.createElement('div');
+                                wrapper.style.position = 'absolute';
+                                wrapper.style.left = ((photo.x + t.dx * photo.w) * 100) + '%';
+                                wrapper.style.top = ((photo.y + t.dy * photo.h) * 100) + '%';
+                                wrapper.style.width = (photo.w * 100) + '%';
+                                wrapper.style.height = (photo.h * 100) + '%';
+                                wrapper.style.transform = 'rotate(' + (photo.rotation || 0) + 'deg)';
+                                if (photoRaw.z != null) wrapper.style.zIndex = String(photoRaw.z);
+                                wrapper.style.transformOrigin = 'center center';
+                                wrapper.style.pointerEvents = 'none';
+                                wrapper.style.overflow = 'hidden';
+                                var img = document.createElement('img');
+                                img.src = normalizeUrl(photo.imageUrl);
+                                img.alt = '';
+                                img.style.width = '100%';
+                                img.style.height = '100%';
+                                img.style.objectFit = 'cover';
+                                img.style.display = 'block';
+                                wrapper.appendChild(img);
+                                innerDiv.appendChild(wrapper);
+                            });
+                        });
+                        pageData.photoZones.forEach(function(photo) {
+                            if (!photo.imageUrl) return;
+                            var zone = null;
+                            for (var i = 0; i < zones.length; i++) {
+                                if (zones[i].id === photo.zoneId) { zone = zones[i]; break; }
+                            }
+                            if (!zone) return;
+                            if (!photoUrl) photoUrl = normalizeUrl(photo.imageUrl);
+
+                            var zoneDiv = document.createElement('div');
+                            zoneDiv.className = 'photo-zone';
+                            zoneDiv.style.left = (zone.x * 100) + '%';
+                            zoneDiv.style.top = (zone.y * 100) + '%';
+                            zoneDiv.style.width = (zone.width * 100) + '%';
+                            zoneDiv.style.height = (zone.height * 100) + '%';
+                            if (photo.z != null) zoneDiv.style.zIndex = String(photo.z);
+                            applyZoneClip(zoneDiv, zone);
+
+                            var img = document.createElement('img');
+                            img.src = normalizeUrl(photo.imageUrl);
+                            img.alt = '';
+                            img.style.left = (photo.x * 100) + '%';
+                            img.style.top = (photo.y * 100) + '%';
+                            img.style.width = (photo.scaleX * 100) + '%';
+                            img.style.height = (photo.scaleY * 100) + '%';
+                            img.style.transform = 'rotate(' + (photo.rotation || 0) + 'deg)';
+
+                            zoneDiv.appendChild(img);
+                            innerDiv.appendChild(zoneDiv);
+                        });
+                    }
+
+                    // 创意预置区域（COLOR_BLOCK/DECOR，管理员标注）
+                    (zones || []).forEach(function(zone) {
+                        if (zone.zoneType !== 'COLOR_BLOCK' && zone.zoneType !== 'DECOR') return;
+                        var preset = {};
+                        try { preset = zone.placeholderText ? JSON.parse(zone.placeholderText) : {}; } catch (e) {}
+                        if (zone.zoneType === 'COLOR_BLOCK') {
+                            var bd = document.createElement('div');
+                            bd.style.position = 'absolute';
+                            bd.style.left = (zone.x * 100) + '%';
+                            bd.style.top = (zone.y * 100) + '%';
+                            bd.style.width = (zone.width * 100) + '%';
+                            bd.style.height = (zone.height * 100) + '%';
+                            bd.style.background = preset.color || '#ff8fab';
+                            bd.style.pointerEvents = 'none';
+                            applyZoneClip(bd, zone);
+                            innerDiv.appendChild(bd);
+                        } else {
+                            var dp = normalizeDecorParams(preset.params || {});
+                            generateDistribution(dp).forEach(function(it) {
+                                var s = document.createElement('span');
+                                s.textContent = it.char || '♥';
+                                s.style.position = 'absolute';
+                                s.style.left = ((zone.x + it.x * zone.width) * 100) + '%';
+                                s.style.top = ((zone.y + it.y * zone.height) * 100) + '%';
+                                s.style.fontSize = ((it.size || dp.size) * zone.width * 100) + 'cqi';
+                                s.style.color = it.color || '#ffffff';
+                                s.style.transform = 'rotate(' + (it.rotation || 0) + 'deg)';
+                                s.style.transformOrigin = 'center center';
+                                s.style.pointerEvents = 'none';
+                                s.style.lineHeight = '1';
+                                innerDiv.appendChild(s);
+                            });
+                        }
+                    });
+
+                    if (pageData.userStickers && pageData.userStickers.length > 0) {
+                        pageData.userStickers.forEach(function(sticker) {
+                            if (!sticker.stickerUrl) return;
+                            var wrapper = document.createElement('div');
+                            wrapper.className = 'sticker-wrapper';
+                            wrapper.style.left = (sticker.x * 100) + '%';
+                            wrapper.style.top = (sticker.y * 100) + '%';
+                            wrapper.style.width = (sticker.width * 100) + '%';
+                            wrapper.style.height = (sticker.height * 100) + '%';
+                            wrapper.style.transform = 'rotate(' + (sticker.rotation || 0) + 'deg)';
+                            wrapper.style.transformOrigin = 'center center';
+
+                            var img = document.createElement('img');
+                            img.src = normalizeUrl(sticker.stickerUrl);
+                            img.alt = '';
+                            wrapper.appendChild(img);
+                            innerDiv.appendChild(wrapper);
+                        });
+                    }
+
+                    if (pageData.textZones && pageData.textZones.length > 0) {
+                        pageData.textZones.forEach(function(text) {
+                            var wrapper = document.createElement('div');
+                            wrapper.className = 'text-wrapper';
+
+                            if (text.zoneId) {
+                                var zone = null;
+                                for (var i = 0; i < zones.length; i++) {
+                                    if (zones[i].id === text.zoneId) { zone = zones[i]; break; }
+                                }
+                                if (!zone) return;
+                                wrapper.style.left = (zone.x * 100) + '%';
+                                wrapper.style.top = (zone.y * 100) + '%';
+                                wrapper.style.width = (zone.width * 100) + '%';
+                                wrapper.style.height = (zone.height * 100) + '%';
+                            } else {
+                                wrapper.style.left = ((text.x || 0) * 100) + '%';
+                                wrapper.style.top = ((text.y || 0) * 100) + '%';
+                                wrapper.style.width = ((text.width || 0.1) * 100) + '%';
+                                wrapper.style.height = ((text.height || 0.05) * 100) + '%';
+                            }
+
+                            var span = document.createElement('span');
+                            span.textContent = text.content || '';
+                            span.style.fontSize = ((text.fontSize || 20) / pgW * 100) + 'cqi';
+                            span.style.fontFamily = text.fontFamily || 'Microsoft YaHei, sans-serif';
+                            span.style.fontWeight = text.bold ? 'bold' : 'normal';
+                            span.style.fontStyle = text.italic ? 'italic' : 'normal';
+                            span.style.textDecoration = text.underline ? 'underline' : 'none';
+                            span.style.textAlign = text.textAlign || 'center';
+                            var fx = text.effects || {};
+                            if (fx.textCutout && photoUrl) {
+                                span.style.color = 'transparent';
+                                span.style.backgroundImage = 'url(' + photoUrl + ')';
+                                span.style.backgroundSize = 'cover';
+                                span.style.backgroundPosition = 'center';
+                                span.style.webkitBackgroundClip = 'text';
+                                span.style.backgroundClip = 'text';
+                            } else {
+                                span.style.color = text.color || '#333333';
+                            }
+                            if (fx.shadow) {
+                                span.style.textShadow = '3px 3px 8px rgba(0,0,0,0.45)';
+                            }
+                            wrapper.appendChild(span);
+                            innerDiv.appendChild(wrapper);
+                        });
+                    }
+                } catch (e) {}
+            }
+
+            return innerDiv;
+        }
+
+        function setPageContent(pageEl, spreadIndex, isRightHalf) {
+            pageEl.innerHTML = '';
+            pageEl.appendChild(createPageContent(spreadIndex, isRightHalf));
+        }
+
+        function updateStaticPages() {
+            var leftEl = document.getElementById('pageLeft');
+            var rightEl = document.getElementById('pageRight');
+            leftEl.style.width = displayW + 'px';
+            leftEl.style.height = displayH + 'px';
+            rightEl.style.display = isSinglePage ? 'none' : '';
+            rightEl.style.width = displayW + 'px';
+            rightEl.style.height = displayH + 'px';
+
+            setPageContent(leftEl, currentView, false);
+            setPageContent(rightEl, currentView, true);
+        }
+
+        function updateFlipCardSize() {
+            var card = document.getElementById('flipCard');
+            card.style.width = displayW + 'px';
+            card.style.height = displayH + 'px';
+        }
+
+        function renderBook() {
+            calcSize();
+            updateStaticPages();
+            updateFlipCardSize();
+            updatePageNum();
+        }
+
+        function nextPage() {
+            if (isFlipping || currentView >= totalViews - 1) return;
+            isFlipping = true;
+
+            var card = document.getElementById('flipCard');
+            var frontEl = document.getElementById('flipFront');
+            var backEl = document.getElementById('flipBack');
+
+            updateFlipCardSize();
+
+            frontEl.innerHTML = '';
+            frontEl.appendChild(createPageContent(currentView, true));
+
+            backEl.innerHTML = '';
+            backEl.appendChild(createPageContent(currentView + 1, false));
+
+            flipPendingDelta = 1;
+            card.addEventListener('transitionend', onFlipTransitionEnd);
+            card.className = 'flip-card forward animating';
+            card.style.transition = 'none';
+            card.style.transform = 'rotateY(0deg)';
+
+            card.offsetHeight;
+
+            card.style.transition = 'transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)';
+            card.style.transform = 'rotateY(-180deg)';
+            clearFlipFallback();
+            flipFallbackTimer = setTimeout(completeFlip, 1000);
+        }
+
+        function prevPage() {
+            if (isFlipping || currentView <= 0) return;
+            isFlipping = true;
+
+            var card = document.getElementById('flipCard');
+            var frontEl = document.getElementById('flipFront');
+            var backEl = document.getElementById('flipBack');
+
+            updateFlipCardSize();
+
+            frontEl.innerHTML = '';
+            frontEl.appendChild(createPageContent(currentView, false));
+
+            backEl.innerHTML = '';
+            backEl.appendChild(createPageContent(currentView - 1, true));
+
+            flipPendingDelta = -1;
+            card.addEventListener('transitionend', onFlipTransitionEnd);
+            card.className = 'flip-card backward animating';
+            card.style.transition = 'none';
+            // 后退翻页：当前左页绕书脊向右翻回（0°→180°），与前进方向相反
+            card.style.transform = 'rotateY(0deg)';
+
+            card.offsetHeight;
+
+            card.style.transition = 'transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)';
+            card.style.transform = 'rotateY(180deg)';
+            clearFlipFallback();
+            flipFallbackTimer = setTimeout(completeFlip, 1000);
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') prevPage();
+            if (e.key === 'ArrowRight') nextPage();
+        });
+
+        window.addEventListener('resize', function() {
+            renderBook();
+        });
+
+        renderBook();
+    </script>
+</body>
+</html>

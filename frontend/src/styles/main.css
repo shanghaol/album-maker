@@ -1,0 +1,1100 @@
+@import "tailwindcss";
+
+/* ============================================ */
+/* Tailwind v4 Theme Customization - macOS Light */
+/* ============================================ */
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+  --color-app-bg: #f5f5f7;
+  --color-app-surface: #ffffff;
+  --color-app-border: rgba(0, 0, 0, 0.08);
+  --color-app-text: #1d1d1f;
+  --color-app-text-secondary: rgba(0, 0, 0, 0.5);
+  --color-app-text-muted: rgba(0, 0, 0, 0.3);
+  --color-app-accent: #6366f1;
+  --color-app-accent-light: #818cf8;
+}
+
+/* ============================================ */
+/* Global Reset & Base                          */
+/* ============================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--color-app-bg);
+  color: var(--color-app-text);
+  line-height: 1.5;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+}
+
+.skip-to-content {
+  position: absolute;
+  top: -100%;
+  left: 16px;
+  padding: 8px 16px;
+  background: var(--color-app-accent);
+  color: #fff;
+  border-radius: 0 0 8px 8px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  z-index: 10000;
+  transition: top 0.2s ease;
+}
+
+.skip-to-content:focus {
+  top: 0;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ============================================ */
+/* macOS Vibrancy Utility                       */
+/* ============================================ */
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+/* ============================================ */
+/* Scrollbar Hiding Utility                    */
+/* ============================================ */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ============================================ */
+/* macOS Scrollbar                              */
+/* ============================================ */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.32);
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ============================================ */
+/* Staggered Entrance Animation                */
+/* ============================================ */
+.stagger-enter {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.stagger-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 700ms ease-out;
+}
+
+/* ============================================ */
+/* Element Plus macOS Desktop Overrides         */
+/* ============================================ */
+
+/* Primary button */
+.el-button--primary {
+  --el-button-bg-color: #6366f1;
+  --el-button-border-color: #6366f1;
+  --el-button-hover-bg-color: #5558e6;
+  --el-button-hover-border-color: #5558e6;
+  --el-button-active-bg-color: #4f46e5;
+  --el-button-active-border-color: #4f46e5;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: -0.01em;
+  transition: all 0.15s ease;
+}
+
+.el-button--primary:hover {
+  box-shadow: 0 1px 4px rgba(99, 102, 241, 0.25);
+}
+
+.el-button {
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: -0.01em;
+  transition: all 0.15s ease;
+}
+
+/* Input fields - macOS style */
+.el-input__wrapper {
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12) inset;
+  transition: box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.el-input__wrapper:hover {
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2) inset;
+  background: #ffffff;
+}
+
+.el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 2px #6366f1 inset, 0 0 0 4px rgba(99, 102, 241, 0.1);
+  background: #ffffff;
+}
+
+.el-input__inner {
+  color: #1d1d1f;
+}
+
+.el-input__inner::placeholder {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+/* Tabs - macOS style */
+.el-tabs__active-bar {
+  background-color: #6366f1;
+  height: 2px;
+}
+
+.el-tabs__item {
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 13px;
+}
+
+.el-tabs__item.is-active {
+  color: #1d1d1f;
+  font-weight: 600;
+}
+
+.el-tabs__item:hover {
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.el-tabs__nav-wrap::after {
+  background-color: rgba(0, 0, 0, 0.08);
+  height: 1px;
+}
+
+/* Dialog - macOS style */
+.el-dialog {
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+}
+
+.el-dialog__header {
+  padding: 20px 24px 0;
+}
+
+.el-dialog__title {
+  color: #1d1d1f;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.el-dialog__body {
+  color: rgba(0, 0, 0, 0.55);
+  padding: 16px 24px;
+}
+
+.el-dialog__footer {
+  padding: 0 24px 20px;
+}
+
+/* Radio button - macOS */
+.el-radio-button__inner {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.12);
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.el-radio-button__original-radio:checked + .el-radio-button__inner {
+  background: #6366f1;
+  border-color: #6366f1;
+  color: #fff;
+  box-shadow: -1px 0 0 0 #6366f1;
+}
+
+/* Tag */
+.el-tag--dark {
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+/* Dropdown menu - macOS style */
+.el-dropdown-menu {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  padding: 4px;
+}
+
+.el-dropdown-menu__item {
+  color: rgba(0, 0, 0, 0.65);
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.el-dropdown-menu__item:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #1d1d1f;
+}
+
+/* Message box - macOS */
+.el-message-box {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+}
+
+.el-message-box__title {
+  color: #1d1d1f;
+}
+
+.el-message-box__message {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+/* Empty state */
+.el-empty__description {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+/* Form item label */
+.el-form-item__label {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* Card - macOS */
+.el-card {
+  --el-card-bg-color: #ffffff;
+  --el-card-border-color: rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.el-card.is-hover-shadow:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Pagination */
+.el-pagination {
+  --el-pagination-bg-color: transparent;
+  --el-pagination-text-color: rgba(0, 0, 0, 0.5);
+}
+
+.el-pagination button {
+  background: rgba(0, 0, 0, 0.04) !important;
+  border-radius: 6px;
+}
+
+.el-pagination button:hover {
+  color: #6366f1;
+}
+
+/* Select dropdown */
+.el-select-dropdown {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+.el-select-dropdown__item {
+  color: rgba(0, 0, 0, 0.55);
+  font-size: 13px;
+  border-radius: 6px;
+  margin: 1px 4px;
+}
+
+.el-select-dropdown__item.hover,
+.el-select-dropdown__item:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.el-select-dropdown__item.selected {
+  color: #6366f1;
+}
+
+/* Descriptions */
+.el-descriptions {
+  --el-descriptions-table-bg-color: #f5f5f7;
+}
+
+.el-descriptions__label {
+  color: rgba(0, 0, 0, 0.45) !important;
+}
+
+.el-descriptions__content {
+  color: rgba(0, 0, 0, 0.75) !important;
+}
+
+/* Upload drag area */
+.el-upload-dragger {
+  background: #f5f5f7;
+  border: 2px dashed rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+}
+
+.el-upload-dragger:hover {
+  border-color: #6366f1;
+}
+
+/* Drawer */
+.el-drawer {
+  background: #ffffff;
+  border-radius: 12px 12px 0 0;
+}
+
+.el-drawer__body {
+  padding: 0;
+  overflow-y: auto;
+}
+
+/* Table - macOS */
+.el-table {
+  --el-table-bg-color: transparent;
+  --el-table-tr-bg-color: transparent;
+  --el-table-header-bg-color: rgba(0, 0, 0, 0.02);
+  --el-table-row-hover-bg-color: rgba(0, 0, 0, 0.03);
+  --el-table-border-color: rgba(0, 0, 0, 0.06);
+  --el-table-text-color: rgba(0, 0, 0, 0.75);
+  --el-table-header-text-color: rgba(0, 0, 0, 0.5);
+  font-size: 13px;
+}
+
+.el-table th.el-table__cell {
+  background: rgba(0, 0, 0, 0.02);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  text-transform: none;
+}
+
+.el-table .cell {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+/* ============================================ */
+/* Page Transition Animations                   */
+/* ============================================ */
+
+/* Shared timing -------------------------------------------------- */
+.page-forward-enter-active,
+.page-forward-leave-active,
+.page-back-enter-active,
+.page-back-leave-active {
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1),
+              opacity 0.35s ease;
+}
+
+/* Leaving element overlays entering element ---------------------- */
+.page-forward-leave-active,
+.page-back-leave-active {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+/* --- forward (push deeper) --- */
+/* old slides left + fades, new slides in from right + fades in */
+.page-forward-enter-from {
+  transform: translateX(100%);
+  opacity: 0;
+}
+.page-forward-leave-to {
+  transform: translateX(-30%);
+  opacity: 0;
+}
+
+/* --- back (pop / return) --- */
+/* old slides right + fades, new slides in from left + fades in */
+.page-back-enter-from {
+  transform: translateX(-30%);
+  opacity: 0;
+}
+.page-back-leave-to {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+/* --- fade (login / register) --- */
+.page-fade-enter-active {
+  transition: opacity 0.35s ease 0.05s;
+}
+.page-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.page-fade-enter-from,
+.page-fade-leave-to {
+  opacity: 0;
+}
+
+/* ============================================ */
+/* iOS Mobile System Styles                     */
+/* ============================================ */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: none;
+  }
+
+  /* ============================================ */
+  /* iOS Button System                            */
+  /* ============================================ */
+  .el-button {
+    min-height: 36px;
+    padding: 8px 16px;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: 10px;
+    letter-spacing: -0.01em;
+    transition: transform 0.15s cubic-bezier(0.32, 0.72, 0, 1),
+                opacity 0.15s ease,
+                background 0.2s ease;
+  }
+
+  .el-button:active:not(:disabled) {
+    transform: scale(0.96);
+  }
+
+  .el-button--small {
+    min-height: 32px;
+    padding: 6px 12px;
+    font-size: 14px;
+    border-radius: 8px;
+    transition: transform 0.12s cubic-bezier(0.32, 0.72, 0, 1),
+                opacity 0.12s ease,
+                background 0.15s ease;
+  }
+
+  .el-button--small:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  .el-button--primary {
+    background: #6366f1;
+    border-color: #6366f1;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(99, 102, 241, 0.25);
+  }
+
+  .el-button--default {
+    background: rgba(0, 0, 0, 0.04);
+    border: 0.5px solid rgba(0, 0, 0, 0.08);
+    color: #1d1d1f;
+  }
+
+  .el-button--default:active {
+    background: rgba(0, 0, 0, 0.08);
+  }
+
+  /* ============================================ */
+  /* iOS Input System                             */
+  /* ============================================ */
+  .el-input__inner {
+    font-size: 16px !important;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+
+  .el-input__wrapper {
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.02);
+    box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.12) inset;
+    transition: box-shadow 0.25s cubic-bezier(0.32, 0.72, 0, 1),
+                background 0.25s ease;
+  }
+
+  .el-input__wrapper:hover {
+    background: rgba(0, 0, 0, 0.04);
+    box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.2) inset;
+  }
+
+  .el-input__wrapper.is-focus {
+    box-shadow: 0 0 0 2px #6366f1 inset;
+    background: #fff;
+  }
+
+  /* ============================================ */
+  /* iOS Dialog (ElDialog)                        */
+  /* ============================================ */
+  .el-dialog {
+    width: 88% !important;
+    max-width: 420px !important;
+    border-radius: 14px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+    border: 0.5px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .el-dialog__header {
+    padding: 20px 20px 0;
+  }
+
+  .el-dialog__title {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    text-align: center;
+    display: block;
+  }
+
+  .el-dialog__headerbtn {
+    top: 18px;
+    right: 16px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.04);
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+
+  .el-dialog__headerbtn:active {
+    background: rgba(0, 0, 0, 0.1);
+    transform: scale(0.9);
+  }
+
+  .el-dialog__body {
+    padding: 16px 20px;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.5);
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  .el-dialog__footer {
+    padding: 0 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .el-dialog__footer .el-button {
+    width: 100%;
+    height: 48px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    margin-left: 0 !important;
+  }
+
+  /* iOS animation for dialog appearance */
+  .el-dialog {
+    animation: ios-dialog-in 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  @keyframes ios-dialog-in {
+    from {
+      opacity: 0;
+      transform: translateY(16px) scale(0.94);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* ============================================ */
+  /* iOS Message Box (Alert / Confirm)            */
+  /* ============================================ */
+  .el-message-box {
+    width: 85% !important;
+    max-width: 360px !important;
+    border-radius: 14px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+    border: 0.5px solid rgba(0, 0, 0, 0.08);
+    padding-bottom: 0;
+  }
+
+  .el-message-box__header {
+    padding: 24px 20px 0;
+  }
+
+  .el-message-box__title {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    text-align: center;
+  }
+
+  .el-message-box__headerbtn {
+    top: 18px;
+    right: 14px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.04);
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+
+  .el-message-box__headerbtn:active {
+    background: rgba(0, 0, 0, 0.1);
+    transform: scale(0.9);
+  }
+
+  .el-message-box__content {
+    padding: 12px 20px 20px;
+    text-align: center;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.5);
+    line-height: 1.5;
+  }
+
+  .el-message-box__btns {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 8px;
+    padding: 0 20px 20px;
+  }
+
+  .el-message-box__btns .el-button {
+    width: 100%;
+    height: 48px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    margin-left: 0 !important;
+  }
+
+  .el-message-box__btns .el-button--default {
+    background: rgba(0, 0, 0, 0.04);
+    border: none;
+    color: #1d1d1f;
+  }
+
+  .el-message-box__btns .el-button--default:active {
+    background: rgba(0, 0, 0, 0.08);
+  }
+
+  .el-message-box__btns .el-button--primary {
+    background: #6366f1;
+    border: none;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+  }
+
+  /* iOS animation for message box */
+  .el-message-box {
+    animation: ios-msgbox-in 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  @keyframes ios-msgbox-in {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.92);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* ============================================ */
+  /* iOS Message (Toast Notifications)            */
+  /* ============================================ */
+  .el-message {
+    min-width: auto;
+    max-width: 88vw;
+    padding: 12px 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    border: 0.5px solid rgba(0, 0, 0, 0.06);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+  }
+
+  .el-message--success {
+    background: #34d399;
+    color: #fff !important;
+  }
+
+  .el-message--success .el-message__icon,
+  .el-message--success .el-message__content,
+  .el-message--success svg {
+    color: #fff !important;
+    fill: #fff !important;
+  }
+
+  .el-message--warning {
+    background: #f59e0b;
+    color: #fff !important;
+  }
+
+  .el-message--warning .el-message__icon,
+  .el-message--warning .el-message__content,
+  .el-message--warning svg {
+    color: #fff !important;
+    fill: #fff !important;
+  }
+
+  .el-message--error {
+    background: #ef4444;
+    color: #fff !important;
+  }
+
+  .el-message--error .el-message__icon,
+  .el-message--error .el-message__content,
+  .el-message--error svg {
+    color: #fff !important;
+    fill: #fff !important;
+  }
+
+  .el-message--info {
+    background: rgba(255, 255, 255, 0.92);
+    color: #1d1d1f !important;
+  }
+
+  .el-message .el-message__icon {
+    font-size: 16px;
+  }
+
+  .el-message .el-message__content {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  /* iOS toast slide-in animation */
+  .el-message {
+    animation: ios-toast-in 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  @keyframes ios-toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(-8px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* ============================================ */
+  /* iOS Dropdown Menu                            */
+  /* ============================================ */
+  .el-dropdown-menu {
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
+    border: 0.5px solid rgba(0, 0, 0, 0.06);
+    padding: 6px;
+    min-width: 160px;
+  }
+
+  .el-dropdown-menu__item {
+    padding: 12px 16px;
+    font-size: 15px;
+    border-radius: 8px;
+    transition: background 0.15s ease;
+  }
+
+  .el-dropdown-menu__item:active {
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  /* iOS popover animation */
+  .el-popper {
+    animation: ios-popover-in 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  @keyframes ios-popover-in {
+    from {
+      opacity: 0;
+      transform: scale(0.92);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* ============================================ */
+  /* iOS Drawer                                   */
+  /* ============================================ */
+  .el-drawer {
+    border-radius: 14px 14px 0 0;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  .el-drawer__header {
+    padding: 16px 20px;
+    margin-bottom: 0;
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .el-drawer__title {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .el-drawer__body {
+    padding: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ============================================ */
+  /* iOS Tabs                                     */
+  /* ============================================ */
+  .el-tabs__item {
+    font-size: 15px;
+    font-weight: 500;
+    padding: 0 16px;
+    height: 40px;
+    line-height: 40px;
+    transition: color 0.2s ease;
+  }
+
+  .el-tabs__nav-wrap::after {
+    height: 0.5px;
+  }
+
+  /* ============================================ */
+  /* iOS Radio / Checkbox                         */
+  /* ============================================ */
+  .el-radio__input.is-checked .el-radio__inner {
+    background: #6366f1;
+    border-color: #6366f1;
+  }
+
+  .el-radio__inner {
+    width: 20px;
+    height: 20px;
+    border-width: 1.5px;
+  }
+
+  .el-radio__label {
+    font-size: 15px;
+  }
+
+  .el-checkbox__input.is-checked .el-checkbox__inner {
+    background: #6366f1;
+    border-color: #6366f1;
+  }
+
+  .el-checkbox__inner {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    border-width: 1.5px;
+  }
+
+  .el-checkbox__label {
+    font-size: 15px;
+  }
+
+  /* ============================================ */
+  /* iOS Select Dropdown                          */
+  /* ============================================ */
+  .el-select-dropdown {
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    border: 0.5px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .el-select-dropdown__item {
+    padding: 12px 16px;
+    font-size: 15px;
+    border-radius: 8px;
+    margin: 2px 4px;
+  }
+
+  /* ============================================ */
+  /* iOS Loading / Skeleton                       */
+  /* ============================================ */
+  @keyframes ios-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .skeleton-card {
+    background: linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.04) 0%,
+      rgba(0, 0, 0, 0.06) 40%,
+      rgba(0, 0, 0, 0.04) 70%
+    );
+    background-size: 200% 100%;
+    animation: ios-shimmer 1.8s ease-in-out infinite;
+  }
+
+  /* ============================================ */
+  /* iOS Touch Ripple / Feedback                  */
+  /* ============================================ */
+  .ios-tappable {
+    transition: transform 0.12s cubic-bezier(0.32, 0.72, 0, 1),
+                opacity 0.12s ease;
+  }
+
+  .ios-tappable:active {
+    transform: scale(0.96);
+    opacity: 0.8;
+  }
+
+  /* ============================================ */
+  /* iOS Scrollbar (thin & native)                */
+  /* ============================================ */
+  ::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 1.5px;
+  }
+
+  /* ============================================ */
+  /* iOS Safe Area Bottom Padding                 */
+  /* ============================================ */
+  .ios-safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+  }
+
+  /* ============================================ */
+  /* iOS Card / Surface Defaults                  */
+  /* ============================================ */
+  .ios-card {
+    background: #fff;
+    border-radius: 12px;
+    border: 0.5px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  }
+
+  .ios-card:active {
+    background: rgba(0, 0, 0, 0.02);
+  }
+}
+/* ============================================ */
+/* 液态玻璃组件（iOS 材质，用户端统一）          */
+/* 质感要素：白色低透明渐变 + 高斯模糊提饱和     */
+/*           玻璃亮边 + 环境投影/接触投影        */
+/*           顶部内嵌高光 + 底部内嵌暗缘         */
+/* ============================================ */
+.glass-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.62) 0%, rgba(255, 255, 255, 0.36) 100%);
+  backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
+  color: #1d1d1f;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.10),
+    0 2px 6px rgba(0, 0, 0, 0.06),
+    inset 0 1px 1px rgba(255, 255, 255, 0.85),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.04);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background 0.2s ease;
+}
+.glass-btn:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.5) 100%);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+}
+.glass-btn:active {
+  transform: scale(0.96);
+  transition: transform 0.1s ease;
+}
+
+.glass-btn--primary {
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.88) 0%, rgba(99, 102, 241, 0.68) 100%);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow:
+    0 8px 24px rgba(99, 102, 241, 0.28),
+    0 2px 6px rgba(99, 102, 241, 0.18),
+    inset 0 1px 1px rgba(255, 255, 255, 0.45),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.06);
+}
+.glass-btn--primary:hover {
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.96) 0%, rgba(99, 102, 241, 0.78) 100%);
+  box-shadow: 0 10px 28px rgba(99, 102, 241, 0.34), 0 2px 6px rgba(99, 102, 241, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.5);
+}
+
+.glass-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.45) 100%);
+  backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow:
+    0 10px 32px rgba(0, 0, 0, 0.10),
+    0 2px 6px rgba(0, 0, 0, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.glass-chip {
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.62) 0%, rgba(255, 255, 255, 0.36) 100%);
+  backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  color: rgba(29, 29, 31, 0.55);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.glass-chip:hover { color: #1d1d1f; transform: translateY(-1px); }
+.glass-chip.active {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 100%);
+  color: #6366f1;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}

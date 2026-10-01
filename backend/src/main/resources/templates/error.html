@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>错误 - 相册制作</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+        .error-card {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 48px;
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
+        }
+        .error-icon { font-size: 64px; margin-bottom: 16px; }
+        h1 { font-size: 24px; margin-bottom: 12px; font-weight: 600; }
+        p { font-size: 16px; opacity: 0.85; margin-bottom: 24px; line-height: 1.6; }
+        a {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 28px;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        a:hover { background: rgba(255,255,255,0.3); }
+    </style>
+</head>
+<body>
+    <div class="error-card">
+        <div class="error-icon">😕</div>
+        <h1>页面错误</h1>
+        <p th:text="${errorMsg}">未知错误</p>
+        <a href="/">返回首页</a>
+    </div>
+</body>
+</html>
